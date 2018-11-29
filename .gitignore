@@ -1,0 +1,10 @@
+*.log
+p2pServer
+p2pClient
+*.pid
+bin/
+duplication
+*.iml
+calgary_access_log
+.idea
+.DS_Store
