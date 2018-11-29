@@ -1,14 +1,15 @@
 package main
 
 import (
-    "net/rpc"
-    "fmt"
-    "strconv"
-    "../shared"
-    "log"
+	"fmt"
+	"log"
+	"net/rpc"
+	"strconv"
+
+	"../shared"
 )
 
-type Gossip int  //receive the gossip message (joining, leaving)
+type Gossip int //receive the gossip message (joining, leaving)
 
 //Handle gossip message from local client or other VMs
 func (r *Gossip) RecGossip(args *shared.GossipMsg, reply *shared.GossipRpl) error {
@@ -41,6 +42,8 @@ func (r *Gossip) RecGossip(args *shared.GossipMsg, reply *shared.GossipRpl) erro
 		//log.Printf("VM <%d> : <%s>!!", args.Id, args.Msg)
 		log.Printf("Membership updated\n")
 		updatePeerList()
+
+		// TODO: rearrange master, client, workers, syn
 
 		//gossip update to live peers with multiple goroutine
 		channel := make(chan *rpc.Call, NUMOFPEER)
@@ -94,11 +97,11 @@ func (r *Gossip) RecGossip(args *shared.GossipMsg, reply *shared.GossipRpl) erro
 	return nil
 }
 
-
 /* Send the gossip message to certain IP address
 SendGossipAsync: send the message asynchronously to the peer nodes
 SendGossipSync: send the message synchronously to the peer nodes (used when adding to the network)
 */
+//// TODO: client use rpc Call to make server know the application
 func SendGossipAsync(args *shared.GossipMsg, ip string, channel chan *rpc.Call) {
 	client, err := rpc.Dial("tcp", ip+":"+RPCPORT)
 

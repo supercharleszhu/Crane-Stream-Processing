@@ -14,6 +14,8 @@ import (
 	"../shared"
 )
 
+var appName int
+
 const NUMOFPEER = 3
 const NUMOFVM = 10
 const IPFILE = "iptable.config"
@@ -28,25 +30,22 @@ var peerList [NUMOFPEER]shared.Member
 var memberList [NUMOFVM]shared.Member
 
 // for mp4
-type App int
+type Crane int
 
 const CRANEPORT = 5001
 
 // start application
-func (r *App) StartApp(args *shared.App, reply *shared.WriteAck) error {
-	senderAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
+
 	// the VM with smallest ID serves as master
-	dstAddr := &net.UDPAddr{IP: net.ParseIP(memberList[1].Ip), Port: CRANEPORT}
-
-	conn, err := net.DialUDP("udp", senderAddr, dstAddr)
+	client, err := rpc.Dial("tcp", memberList[1].Ip+":"+RPCPORT)
+	if err != nil {
+		fmt.Printf("Start %s fails", args.AppName)
+		return nil
+	}
+	fmt.Printf("Start %s succeeds", args.AppName)
+	err = client.Call("Crane.MasterStart", args, &shared.EmptyReq{})
 	checkErr(err)
-	defer conn.Close()
-
-	// Tell master which application will be started
-	conn.Write([]byte(args.AppName))
-
-	// wait 3 second
-	time.Sleep(3 * time.Second)
 
 	// start emitting data streaming
 
@@ -85,6 +84,7 @@ func init() {
 	// TODO delete all sdfsfile
 	deleteAllSfile()
 }
+
 func main() {
 
 	// SWIM failure detection with UDP
@@ -109,14 +109,14 @@ func main() {
 	gossip := new(Gossip)
 	memlst := new(Memlst)
 	sdfs := new(SDFS)
-	app := new(App)
+	crane := new(Crane)
 	//registering new servers...
 	server := rpc.NewServer()
 	server.RegisterName("GrepLog", grepLog)
 	server.RegisterName("Gossip", gossip)
 	server.RegisterName("Memlst", memlst)
 	server.RegisterName("SDFS", sdfs)
-	server.RegisterName("App", app)
+	server.RegisterName("Crane", crane)
 	server.Accept(listener)
 
 	<-done

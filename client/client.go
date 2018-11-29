@@ -217,7 +217,7 @@ func start(appName string) {
 	client, err := rpc.Dial("tcp", SELFIP+":"+PORT)
 	checkErr(err)
 	reply := &shared.WriteAck{}
-	err = client.Call("App.StartApp", req, reply)
+	err = client.Call("Crane.StartApp", req, reply)
 	fmt.Printf("Start %s: %t ", appName, reply.Finish)
 }
 

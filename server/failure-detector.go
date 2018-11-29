@@ -79,6 +79,7 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	}
 }
 
+// TODO: logic here
 func UDPReceiver(done chan bool) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: UDPPORT})
 	checkErr(err)
