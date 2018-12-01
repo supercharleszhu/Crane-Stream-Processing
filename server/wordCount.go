@@ -60,7 +60,7 @@ func (w *wordCount) join(data string) {
 			word: count,
 		}
 	} else {
-		tempMap := temp.(map[string]int)
+		tempMap := *temp.(*map[string]int)
 		if _, ok := tempMap[word]; !ok {
 			tempMap[word] = count
 		} else {
