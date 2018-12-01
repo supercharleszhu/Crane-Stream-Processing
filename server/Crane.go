@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
+	"net/rpc"
 	"strconv"
 	"strings"
+
+	"../shared"
 )
 
 var Cache map[int]interface{}
@@ -79,4 +83,25 @@ func parseMessage(rawMessage string) {
 	} else {
 		currApp.transform(data)
 	}
+}
+
+const CRANEPORT = 5001
+
+// start application
+func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
+
+	// the VM with smallest ID serves as master
+	client, err := rpc.Dial("tcp", MasterIp+":"+RPCPORT)
+	if err != nil {
+		fmt.Printf("Start %s fails", args.AppName)
+		return nil
+	}
+	fmt.Printf("Start %s succeeds", args.AppName)
+	err = client.Call("Crane.MasterStart", args, &shared.EmptyReq{})
+	checkErr(err)
+
+	// start emitting data streaming
+
+	reply.Finish = true
+	return nil
 }

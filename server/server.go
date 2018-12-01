@@ -33,27 +33,6 @@ var memberList [NUMOFVM]shared.Member
 // for mp4
 type Crane int
 
-const CRANEPORT = 5001
-
-// start application
-func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
-
-	// the VM with smallest ID serves as master
-	client, err := rpc.Dial("tcp", memberList[1].Ip+":"+RPCPORT)
-	if err != nil {
-		fmt.Printf("Start %s fails", args.AppName)
-		return nil
-	}
-	fmt.Printf("Start %s succeeds", args.AppName)
-	err = client.Call("Crane.MasterStart", args, &shared.EmptyReq{})
-	checkErr(err)
-
-	// start emitting data streaming
-
-	reply.Finish = true
-	return nil
-}
-
 // Read IP file and initialize the memberList
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())

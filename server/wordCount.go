@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"mp-4/shared"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"../shared"
 )
 
 type Pair struct {
