@@ -17,7 +17,7 @@ import (
 )
 
 var Cache map[int]interface{}
-var StopApp = false
+var StopApp = true
 var MasterIp string
 var standByMasterIp string
 
@@ -35,7 +35,7 @@ type Crane int
 
 // start application
 func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
-
+	StopApp = false
 	// Fetch the demo-data from sdfs to local dir
 	Ticker = time.NewTicker(args.Period)
 	SendPeriod = args.SendPeriod
@@ -316,7 +316,9 @@ func assignRoles() {
 			SendPeriod: SendPeriod,
 		}
 		res := &shared.WriteAck{}
-		crane.StartApp(args, res)
+		if StopApp == false {
+			crane.StartApp(args, res)
+		}
 	}
 	SpoutIp = newSpoutIp
 	if SELFIP == SpoutIp && SinkIp != newSinkIp {
@@ -328,7 +330,9 @@ func assignRoles() {
 			SendPeriod: SendPeriod,
 		}
 		res := &shared.WriteAck{}
-		crane.StartApp(args, res)
+		if StopApp == false {
+			crane.StartApp(args, res)
+		}
 	}
 	SinkIp = newSinkIp
 
