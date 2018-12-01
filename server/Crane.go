@@ -298,7 +298,6 @@ func assignRoles() {
 			SpoutIp = member.Ip
 		} else if counter == 1 {
 			MasterIp = member.Ip
-			AckerIp = member.Ip
 		} else if counter == 2 {
 			standByMasterIp = member.Ip
 		} else if counter == len(memberList)-1 {
