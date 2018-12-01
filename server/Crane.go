@@ -291,24 +291,22 @@ func sendAppName(appName string) {
 }
 
 func assignRoles() {
-
+	aliveIp := make([]string, 0)
 	counter := 0
 	for _, member := range memberList {
-		if counter == 0 {
-			SpoutIp = member.Ip
-		} else if counter == 1 {
-			MasterIp = member.Ip
-		} else if counter == 2 {
-			standByMasterIp = member.Ip
-		} else if counter == len(memberList)-1 {
-			SinkIp = member.Ip
-		} else {
-			workerIP = append(workerIP, member.Ip)
+		if member.Status == 1 {
+			aliveIp = append(aliveIp, member.Ip)
+			counter++
 		}
-
-		counter++
 	}
-
+	if counter < 5 {
+		log.Printf("not enough worker\n")
+		return
+	}
+	MasterIp = aliveIp[1]
+	standByMasterIp = aliveIp[2]
+	workerIP = aliveIp[3 : counter-1]
+	SinkIp = aliveIp[counter-1]
 }
 
 func deleteMessage(id string) {
