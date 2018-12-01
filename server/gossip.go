@@ -42,8 +42,7 @@ func (r *Gossip) RecGossip(args *shared.GossipMsg, reply *shared.GossipRpl) erro
 		//log.Printf("VM <%d> : <%s>!!", args.Id, args.Msg)
 		log.Printf("Membership updated\n")
 		updatePeerList()
-
-		// TODO: rearrange master, client, workers, syn
+		assignRoles()
 
 		//gossip update to live peers with multiple goroutine
 		channel := make(chan *rpc.Call, NUMOFPEER)

@@ -23,6 +23,9 @@ var SELFIP string
 var ID int // the index of VM
 var memberList [NUMOFVM]shared.Member
 
+const Period = 10000 * time.Millisecond // millisecond
+const SendPeriod = 200 * time.Millisecond
+
 // get the pattern in the distributed grep command
 func getPattern() string {
 	var pattern string
@@ -213,7 +216,29 @@ func showPrList() {
 
 // send start request to local server
 func start(appName string) {
-	req := &shared.App{AppName: appName}
+	req := &shared.App{
+		AppName:    appName,
+		Period:     Period,
+		SendPeriod: SendPeriod,
+	}
+	client, err := rpc.Dial("tcp", SELFIP+":"+PORT)
+	checkErr(err)
+	reply := &shared.WriteAck{}
+	err = client.Call("Crane.StartApp", req, reply)
+	fmt.Printf("Start %s: %t ", appName, reply.Finish)
+}
+
+func startWithConfig(appName string, period string, sendPeriod string) {
+	sendP, err := strconv.Atoi(sendPeriod)
+	p, err := strconv.Atoi(period)
+	sendPDuration := time.Duration(sendP) * time.Millisecond
+	pDuration := time.Duration(p) * time.Millisecond
+	checkErr(err)
+	req := &shared.App{
+		AppName:    appName,
+		Period:     pDuration,
+		SendPeriod: sendPDuration,
+	}
 	client, err := rpc.Dial("tcp", SELFIP+":"+PORT)
 	checkErr(err)
 	reply := &shared.WriteAck{}
@@ -263,8 +288,7 @@ func main() {
 			start(cmdArr[1])
 		} else if cmdArr[0] == "start" && len(cmdArr) == 5 {
 			put(cmdArr[2], "demo-data")
-
-			start(cmdArr[1])
+			startWithConfig(cmdArr[1], cmdArr[3], cmdArr[4])
 		} else if cmdArr[0] == "put" && len(cmdArr) == 3 {
 			put(cmdArr[1], cmdArr[2])
 		} else if cmdArr[0] == "get" && len(cmdArr) == 3 {
@@ -323,6 +347,7 @@ func showCommand() {
 	fmt.Println("SDFS command line interface\n" +
 		"Please enter the following command:\n" +
 		"======================================================\n" +
+		"start appName localfilename period sendPeriod" +
 		"put localfilename sdfsfilename\n" +
 		"get sdfsfilename localfilename\n" +
 		"delete sdfsfilename\n" +

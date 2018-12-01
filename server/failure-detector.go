@@ -114,6 +114,14 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		ackVal, err := strconv.Atoi(cmdArr[2])
 		checkErr(err)
 		handleAck(messageId, ackVal)
+	} else if len(cmdArr) == 2 && cmdArr[0] == "messageAbort" {
+		messageId, err := strconv.Atoi(cmdArr[1])
+		checkErr(err)
+		AbortCache(messageId)
+	} else if len(cmdArr) == 2 && cmdArr[0] == "messageCommit" {
+		messageId, err := strconv.Atoi(cmdArr[1])
+		checkErr(err)
+		currApp.mergeCache(messageId)
 	} else if len(cmdArr) == 4 {
 		// data message
 		parseMessage(command)

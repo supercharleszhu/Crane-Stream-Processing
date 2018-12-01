@@ -28,12 +28,9 @@ type wordCount struct {
 	result    map[string]int
 	messageId int
 	ackVal    int
-	counter   int
 }
 
-const CountThreshold = 5000
-
-func (w wordCount) mergeCache(messageId int) {
+func (w *wordCount) mergeCache(messageId int) {
 	for word, count := range Cache[messageId].(map[string]int) {
 		if _, ok := w.result[word]; !ok {
 			w.result[word] = count
@@ -41,6 +38,7 @@ func (w wordCount) mergeCache(messageId int) {
 			w.result[word] += count
 		}
 	}
+	log.Printf("Merged the cache of messageId: %d into result\n", messageId)
 }
 
 func (w *wordCount) join(data string) {
@@ -69,14 +67,9 @@ func (w *wordCount) join(data string) {
 			tempMap[word] += count
 		}
 	}
+
+	//sendAck
 	sendAck(w.messageId, w.ackVal)
-	w.counter += 1
-
-	// if reach the threshold, write partial result
-	if w.counter >= CountThreshold {
-		w.writeToSDFS()
-	}
-
 }
 func (w *wordCount) transform(data string) {
 	words := strings.Fields(data)

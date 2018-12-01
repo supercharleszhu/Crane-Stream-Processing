@@ -57,6 +57,10 @@ type SDFSMsg struct {
 	TimeStamp     time.Time
 }
 
+type CraneMsg struct {
+	AppName string
+}
+
 type WriteAck struct {
 	Finish bool
 }
@@ -73,5 +77,7 @@ type DupList struct {
 
 // for "start app1"
 type App struct {
-	AppName string
+	AppName    string
+	Period     time.Duration
+	SendPeriod time.Duration
 }
