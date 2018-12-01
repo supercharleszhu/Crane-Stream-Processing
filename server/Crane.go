@@ -65,12 +65,20 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 	// start sending data stream
 	line := 0
-	for _, ip := range workerIP {
+
+	counter := 0
+	for {
+
 		n, _, err := br.ReadLine()
-		log.Println(string(n))
+
 		if err == io.EOF {
 			break
 		}
+
+		ip := workerIP[counter]
+		counter = (counter + 1) % len(workerIP)
+
+		log.Println(string(n))
 
 		time.Sleep(SendPeriod)
 		// set up id and random number
@@ -229,6 +237,7 @@ func sendMessageSink(ackVal int, messageId int, message string) {
 func sendMessageWorker(task string, ackVal int, messageId int, message string, workerIp string) {
 	//TODO: send message to worker
 	messageWorker := task + " " + strconv.Itoa(messageId) + " " + strconv.Itoa(ackVal) + " " + message
+	log.Println("messageWorker: " + messageWorker)
 	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
 	workerAddr := &net.UDPAddr{IP: net.ParseIP(workerIp), Port: UDPPORT}
 	conn, Err := net.DialUDP("udp", monitorAddr, workerAddr)
