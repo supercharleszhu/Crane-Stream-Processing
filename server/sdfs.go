@@ -143,6 +143,7 @@ func (r *SDFS) GetReq(args *shared.SDFSMsg, reply *shared.WriteAck) error {
 		//log.Printf("The hashVal of sdfsFile: %s, %d;  Destination ID: %d\n", args.SDFSFileName, hashVal, destID)
 		resp, err = http.Get("http://" + memberList[destID].Ip + ":" + HTTPPORT + "/duplication/" + args.SDFSFileName)
 		if err != nil || resp.StatusCode >= 400 {
+			log.Println("get file from " + memberList[destID].Ip + ": " + resp.Status)
 			continue
 		} else {
 			log.Println("get file from " + memberList[destID].Ip + ": " + resp.Status)

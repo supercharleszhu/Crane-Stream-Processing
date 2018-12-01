@@ -27,7 +27,7 @@ var message = make(map[int]string)
 const CRANEPORT = 5001
 
 var Period = 10000 * time.Millisecond // millisecond
-var SendPeriod = 200 * time.Millisecond
+var SendPeriod = 2000 * time.Millisecond
 var Ticker = time.NewTicker(Period)
 
 // Crane RPC server
@@ -114,6 +114,13 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	}
 
 	// Answer back to the client CLI
+	crane := new(Crane)
+	newargs := &shared.CraneMsg{
+		AppName: currAppName,
+	}
+	res := &shared.WriteAck{}
+	crane.StopApp(newargs, res)
+
 	reply.Finish = true
 	return nil
 }

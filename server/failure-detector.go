@@ -126,7 +126,7 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		// data message
 		parseMessage(command)
 	} else {
-		log.Printf("UDP Bad message format!\n")
+		log.Printf("UDP Bad message format!\n message: %s\n", command)
 		return
 	}
 
