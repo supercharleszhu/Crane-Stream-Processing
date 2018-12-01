@@ -343,6 +343,13 @@ func assignRoles() {
 	}
 	SinkIp = newSinkIp
 
+	log.Println("Spout Ip" + SpoutIp)
+	log.Println("Master Ip" + MasterIp)
+	log.Println("standbyMaster IP" + standByMasterIp)
+	for i := 0; i < len(workerIP); i++ {
+		log.Println("worker IP " + strconv.Itoa(i) + workerIP[i])
+	}
+	log.Println("Sink IP" + SinkIp)
 }
 
 func deleteMessage(id string) {
