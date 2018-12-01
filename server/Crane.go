@@ -22,7 +22,6 @@ var MasterIp string
 var standByMasterIp string
 
 var workerIP = make([]string, 0)
-var AckerIp string
 var message = make(map[int]string)
 
 const CRANEPORT = 5001
@@ -38,6 +37,8 @@ type Crane int
 func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 	// Fetch the demo-data from sdfs to local dir
+	Ticker = time.NewTicker(args.Period)
+	SendPeriod = args.SendPeriod
 	req := &shared.SDFSMsg{Type: "get", LocalFileName: "data", SDFSFileName: "demo-data", TimeStamp: time.Now()}
 	client, err := rpc.Dial("tcp", SELFIP+":"+RPCPORT)
 	checkErr(err)
@@ -118,24 +119,6 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	return nil
 }
 
-//func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
-//
-//	// the VM with smallest ID serves as master
-//	client, err := rpc.Dial("tcp", memberList[1].Ip+":"+RPCPORT)
-//	if err != nil {
-//		fmt.Printf("Start %s fails", args.AppName)
-//		return nil
-//	}
-//	fmt.Printf("Start %s succeeds", args.AppName)
-//	err = client.Call("Crane.MasterStart", args, &shared.EmptyReq{})
-//	checkErr(err)
-//
-//	// start emitting data streaming
-//
-//	reply.Finish = true
-//	return nil
-//}
-
 func (r *Crane) RecStopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
 	StopApp = true
 	reply.Finish = true
@@ -147,7 +130,7 @@ func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
 	channel := make(chan *rpc.Call, NUMOFVM)
 	for _, member := range memberList {
 		if member.Status == 1 && member.Ip != MasterIp && member.Id != ID {
-			sendCommandAsync(args, member.Ip, channel)
+			sendStopAsync(args, member.Ip, channel)
 		} else {
 			channel <- &rpc.Call{}
 		}
@@ -158,21 +141,16 @@ func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
 	}
 }
 
-func sendCommandAsync(args *shared.CraneMsg, ip string, channel chan *rpc.Call) {
+func sendStopAsync(args *shared.CraneMsg, ip string, channel chan *rpc.Call) {
 	client, err := rpc.Dial("tcp", ip+":"+RPCPORT)
 	if err != nil {
 		channel <- &rpc.Call{}
 		return
 	}
-	log.Printf("broadcasting Command to start/stop app: %s\n", args.Command)
+	log.Printf("broadcasting Command to stop app\n")
 	reply := &shared.WriteAck{}
-	if args.Command == "start" {
-		gCall := client.Go("Crane.RecStartApp", args, reply, channel)
-		checkErr(gCall.Error)
-	} else {
-		gCall := client.Go("Crane.RecStopApp", args, reply, channel)
-		checkErr(gCall.Error)
-	}
+	gCall := client.Go("Crane.RecStopApp", args, reply, channel)
+	checkErr(gCall.Error)
 }
 
 //App Part of Crane
@@ -270,6 +248,10 @@ func parseMessage(rawMessage string) {
 	}
 }
 
+func AbortCache(messageId int) {
+	Cache[messageId] = new(interface{})
+}
+
 func sendAppName(appName string) {
 
 	// specify the app name
@@ -308,7 +290,6 @@ func sendAppName(appName string) {
 
 func assignRoles() {
 	MasterIp = memberList[1].Ip
-	AckerIp = memberList[1].Ip
 	SpoutIp = memberList[0].Ip
 	standByMasterIp = memberList[2].Ip
 	SinkIp = memberList[len(memberList)-1].Ip

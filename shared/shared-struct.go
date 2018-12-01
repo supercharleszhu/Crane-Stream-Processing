@@ -59,7 +59,6 @@ type SDFSMsg struct {
 
 type CraneMsg struct {
 	AppName string
-	Command string
 }
 
 type WriteAck struct {
@@ -78,5 +77,7 @@ type DupList struct {
 
 // for "start app1"
 type App struct {
-	AppName string
+	AppName    string
+	Period     time.Duration
+	SendPeriod time.Duration
 }

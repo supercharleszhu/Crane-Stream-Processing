@@ -30,9 +30,7 @@ type wordCount struct {
 	ackVal    int
 }
 
-const CountThreshold = 5000
-
-func (w wordCount) mergeCache(messageId int) {
+func (w *wordCount) mergeCache(messageId int) {
 	for word, count := range Cache[messageId].(map[string]int) {
 		if _, ok := w.result[word]; !ok {
 			w.result[word] = count
