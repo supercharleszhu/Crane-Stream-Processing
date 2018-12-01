@@ -211,6 +211,7 @@ func sendAck(messageId int, ackVal int) {
 
 // App Configuration. Modify this if new app is added
 func startApp(appName string) {
+	assignRoles()
 	Cache = make(map[int]interface{}) //truncate the cache
 	StopApp = false
 	currAppName = appName
