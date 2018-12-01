@@ -84,7 +84,7 @@ func UDPReceiver(done chan bool) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: UDPPORT})
 	checkErr(err)
 
-	data := make([]byte, 16)
+	data := make([]byte, 1000)
 	for {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
 		checkErr(err)
