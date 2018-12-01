@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net"
 	"strconv"
 	"strings"
 )
@@ -21,8 +22,15 @@ type App interface {
 var currApp App
 var currAppName string
 
-func sendAck(messageId int) {
-	//TODO send ack to acker
+func sendAck(messageId int, ackVal int) {
+	messageAck := "ack " + strconv.Itoa(messageId) + " " + strconv.Itoa(ackVal)
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+	ackerAddr := &net.UDPAddr{IP: net.ParseIP(MasterIp), Port: UDPPORT}
+	conn, Err := net.DialUDP("udp", monitorAddr, ackerAddr)
+	defer conn.Close()
+	checkErr(Err)
+	conn.Write([]byte(messageAck))
+	log.Printf("send messageId %d: Ack\n", messageId)
 
 }
 
@@ -38,13 +46,19 @@ func startApp(appName string) {
 	}
 }
 
-func sendMessageSink(message string) {
-	//TODO: send message to sink
-
+func sendMessageSink(ackVal int, messageId int, message string) {
+	messageSink := "join " + strconv.Itoa(messageId) + " " + strconv.Itoa(ackVal) + " " + message
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
+	conn, Err := net.DialUDP("udp", monitorAddr, sinkAddr)
+	defer conn.Close()
+	checkErr(Err)
+	conn.Write([]byte(messageSink))
+	log.Printf("send messageId %d: Ack\n", messageId)
 }
 
 func sendMessageWorker(message string) {
-	//TODO: send message to sink
+	//TODO: send message to worker
 }
 
 func parseMessage(rawMessage string) {

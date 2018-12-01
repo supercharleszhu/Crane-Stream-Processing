@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"net/rpc"
 	"os"
@@ -55,6 +56,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 // Read IP file and initialize the memberList
 func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	SELFIP = getInternalIP()
 	log.Println("Ip address: " + SELFIP)
 	file, err := os.Open(IPFILE)

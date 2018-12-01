@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 )
@@ -48,12 +49,18 @@ func (w *wordCount) join(data string) {
 			tempMap[word] += count
 		}
 	}
-	sendAck(w.messageId)
+	sendAck(w.messageId, w.ackVal)
 
 }
 func (w *wordCount) transform(data string) {
-	//TODO: implement it!
-	sendAck(w.messageId)
+	words := strings.Fields(data)
+	for _, word := range words {
+		message := word + " " + strconv.Itoa(1)
+		ackVal := int(rand.Int31n(255))
+		w.ackVal ^= ackVal
+		sendMessageSink(w.messageId, ackVal, message)
+	}
+	sendAck(w.messageId, w.ackVal)
 }
 
 func (w *wordCount) getMessageId() int {
