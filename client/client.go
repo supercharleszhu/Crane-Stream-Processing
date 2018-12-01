@@ -261,6 +261,8 @@ func main() {
 		} else if cmdArr[0] == "start" && len(cmdArr) == 2 {
 			put("demo-data", "demo-data")
 			start(cmdArr[1])
+		} else if cmdArr[0] == "start" && len(cmdArr) == 5 {
+
 		} else if cmdArr[0] == "put" && len(cmdArr) == 3 {
 			put(cmdArr[1], cmdArr[2])
 		} else if cmdArr[0] == "get" && len(cmdArr) == 3 {

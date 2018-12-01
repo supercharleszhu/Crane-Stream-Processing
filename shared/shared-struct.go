@@ -57,6 +57,11 @@ type SDFSMsg struct {
 	TimeStamp     time.Time
 }
 
+type CraneMsg struct {
+	AppName string
+	Command string
+}
+
 type WriteAck struct {
 	Finish bool
 }

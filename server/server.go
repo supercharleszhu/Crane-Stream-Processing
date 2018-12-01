@@ -24,15 +24,11 @@ const RPCPORT = "6000"
 const HTTPPORT = "8000"
 const W = 4
 const TIMEFMT = "2006-01-02 15:04:05"
-const NUMOFWORKER = 6
 
 var SELFIP string
 var ID int // the index of VM
 var peerList [NUMOFPEER]shared.Member
 var memberList [NUMOFVM]shared.Member
-
-// for mp4
-type Crane int
 
 // Read IP file and initialize the memberList
 func init() {
@@ -71,6 +67,7 @@ func main() {
 
 	// SWIM failure detection with UDP
 	done := make(chan bool, 2)
+	go CraneTimer()
 	go launchFailureDetection(done)
 	go UDPReceiver(done)
 	go handleHTTP()

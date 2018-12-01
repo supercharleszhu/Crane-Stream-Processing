@@ -28,7 +28,6 @@ type wordCount struct {
 	result    map[string]int
 	messageId int
 	ackVal    int
-	counter   int
 }
 
 const CountThreshold = 5000
@@ -69,14 +68,9 @@ func (w *wordCount) join(data string) {
 			tempMap[word] += count
 		}
 	}
+
+	//sendAck
 	sendAck(w.messageId, w.ackVal)
-	w.counter += 1
-
-	// if reach the threshold, write partial result
-	if w.counter >= CountThreshold {
-		w.writeToSDFS()
-	}
-
 }
 func (w *wordCount) transform(data string) {
 	words := strings.Fields(data)
