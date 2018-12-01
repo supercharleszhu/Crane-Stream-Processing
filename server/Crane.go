@@ -1,18 +1,30 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
+	"io"
 	"log"
+	"math/rand"
 	"net"
 	"net/rpc"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"../shared"
 )
 
 var Cache map[int]interface{}
 var MasterIp string
+var standByMasterIp string
+
+var workerIP = make([]string, 0)
+var AckerIp string
+var message = make(map[int]string)
+
+const CRANEPORT = 5001
 
 type App interface {
 	join(message string)
@@ -63,8 +75,16 @@ func sendMessageSink(ackVal int, messageId int, message string) {
 	log.Printf("send messageId %d: Ack\n", messageId)
 }
 
-func sendMessageWorker(message string) {
+func sendMessageWorker(task string, ackVal int, messageId int, message string, workerIp string) {
 	//TODO: send message to worker
+	messageWorker := task + " " + strconv.Itoa(messageId) + " " + strconv.Itoa(ackVal) + " " + message
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+	workerAddr := &net.UDPAddr{IP: net.ParseIP(workerIp), Port: UDPPORT}
+	conn, Err := net.DialUDP("udp", monitorAddr, workerAddr)
+	defer conn.Close()
+	checkErr(Err)
+	conn.Write([]byte(messageWorker))
+	log.Printf("send messageId %d: Ack\n", messageId)
 }
 
 func parseMessage(rawMessage string) {
@@ -85,23 +105,139 @@ func parseMessage(rawMessage string) {
 	}
 }
 
-const CRANEPORT = 5001
-
 // start application
 func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
-	// the VM with smallest ID serves as master
-	client, err := rpc.Dial("tcp", MasterIp+":"+RPCPORT)
-	if err != nil {
-		fmt.Printf("Start %s fails", args.AppName)
-		return nil
-	}
-	fmt.Printf("Start %s succeeds", args.AppName)
-	err = client.Call("Crane.MasterStart", args, &shared.EmptyReq{})
+	// Fetch the demo-data from sdfs to local dir
+	req := &shared.SDFSMsg{Type: "get", LocalFileName: "data", SDFSFileName: "demo-data", TimeStamp: time.Now()}
+	client, err := rpc.Dial("tcp", SELFIP+":"+RPCPORT)
 	checkErr(err)
+	reply = &shared.WriteAck{}
+	err = client.Call("SDFS.GetReq", req, reply)
 
-	// start emitting data streaming
+	// the VM with smallest ID serves as master
+	// client, err = rpc.Dial("tcp", MasterIp+":"+RPCPORT)
+	// if err != nil {
+	// 	log.Printf("Start %s fails", args.AppName)
+	// 	return nil
+	// }
+	// log.Printf("Start %s succeeds\n", args.AppName)
 
+	// Assign roles
+	assignRoles()
+
+	// Tell all nodes which application is running
+	sendAppName(args.AppName)
+
+	// access the file
+	absPath, _ := filepath.Abs("./duplication/data")
+	file, err := os.Open(absPath)
+	checkErr(err)
+	defer file.Close()
+	br := bufio.NewReader(file)
+
+	// start sending data stream
+	line := 0
+	for _, ip := range workerIP {
+		n, _, err := br.ReadLine()
+		if err == io.EOF {
+			break
+		}
+
+		// set up id and random number
+		line++
+		ackVal := int(rand.Int31n(255))
+
+		// Send data to worker (task messageID ackVal data)
+		// TODO: implement transform logic
+		sendMessageWorker("transform", ackVal, ackVal, string(n), ip)
+
+		// Record the data into message map
+		message[line] = string(n)
+
+		// send ack to Acker (ack messageID ackVal)
+		sendAck(line, ackVal)
+
+	}
+
+	// // TODO: when UDPReceiver receives an ack on a message, the message will be removed in map
+
+	// send all message in the message map again to worker
+	for line, data := range message {
+		// connWorker, err := net.Dial("udp", workerIP[0]+":"+"8888")
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
+		// defer connWorker.Close()
+
+		ackVal := int(rand.Int31n(255))
+
+		// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
+		sendMessageWorker("transform", ackVal, line, data, workerIP[0])
+
+		// // Record the data into message map
+		// message[line] = string(n)
+
+		// send message to Acker
+		// connMaster.Write([]byte("ack " + strconv.Itoa(line) + " " + strconv.Itoa(ackVal)))
+		sendAck(line, ackVal)
+	}
+
+	// Answer back to the client CLI
 	reply.Finish = true
 	return nil
 }
+
+func sendAppName(appName string) {
+
+	// specify the app name
+	message := "start " + appName
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+
+	// Send to master
+	ackerAddr := &net.UDPAddr{IP: net.ParseIP(MasterIp), Port: UDPPORT}
+	conn, err := net.DialUDP("udp", monitorAddr, ackerAddr)
+	checkErr(err)
+	// defer conn.Close()
+	conn.Write([]byte(message))
+	conn.Close()
+	log.Printf("send start %s to master\n", appName)
+
+	// Send to Sink
+	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
+	conn, Err := net.DialUDP("udp", monitorAddr, sinkAddr)
+	// defer conn.Close()
+	checkErr(Err)
+	conn.Write([]byte(message))
+	conn.Close()
+	log.Printf("send start %s to sink\n", appName)
+
+	// Send to workers
+	for _, ip := range workerIP {
+		workerAddr := &net.UDPAddr{IP: net.ParseIP(ip), Port: UDPPORT}
+		conn, Err := net.DialUDP("udp", monitorAddr, workerAddr)
+		checkErr(Err)
+		conn.Write([]byte(message))
+		conn.Close()
+		log.Printf("send start %s to workers\n", appName)
+
+	}
+}
+
+func assignRoles() {
+	MasterIp = memberList[1].Ip
+	AckerIp = memberList[1].Ip
+	SpoutIp = memberList[0].Ip
+	standByMasterIp = memberList[2].Ip
+	SinkIp = memberList[len(memberList)-1].Ip
+
+	for _, member := range memberList {
+		if member.Ip != MasterIp && member.Ip != SpoutIp && member.Ip != standByMasterIp && member.Ip != SinkIp {
+			workerIP = append(workerIP, member.Ip)
+		}
+	}
+}
+
+// func (r *Crane) MasterStart(args *shared.App, reply *shared.EmptyReq) error {
+//
+// }

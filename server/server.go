@@ -24,6 +24,7 @@ const RPCPORT = "6000"
 const HTTPPORT = "8000"
 const W = 4
 const TIMEFMT = "2006-01-02 15:04:05"
+const NUMOFWORKER = 6
 
 var SELFIP string
 var ID int // the index of VM
