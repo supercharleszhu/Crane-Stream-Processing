@@ -205,7 +205,7 @@ func sendAck(messageId int, ackVal int) {
 	defer conn.Close()
 	checkErr(Err)
 	conn.Write([]byte(messageAck))
-	log.Printf("send messageId %d: Ack\n", messageId)
+	log.Printf("send messageId %d to %s: Ack\n", messageId, MasterIp)
 
 }
 
@@ -231,7 +231,7 @@ func sendMessageSink(ackVal int, messageId int, message string) {
 	defer conn.Close()
 	checkErr(Err)
 	conn.Write([]byte(messageSink))
-	log.Printf("send messageId %d: Ack\n", messageId)
+	log.Printf("send messageId %d to %s: join\n", messageId, SinkIp)
 }
 
 func sendMessageWorker(task string, ackVal int, messageId int, message string, workerIp string) {

@@ -125,6 +125,7 @@ func (w *wordCount) writeToSDFS() {
 		SDFSFileName:  "wordcount_result",
 		TimeStamp:     time.Now(),
 	}
+	log.Println("Writing to SDFS")
 	res := &shared.WriteAck{}
 	sdfs := new(SDFS)
 	sdfs.PutReq(args, res)
