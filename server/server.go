@@ -92,6 +92,7 @@ func main() {
 	go launchFailureDetection(done)
 	go UDPReceiver(done)
 	go handleHTTP()
+	go launchAcker()
 	log.Printf("Start UDP")
 
 	dst, err := os.OpenFile("test.txt", os.O_APPEND|os.O_WRONLY, 0644)

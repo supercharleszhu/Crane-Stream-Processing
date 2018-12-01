@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"strconv"
+	"strings"
 	"time"
 
 	"../shared"
@@ -48,15 +50,13 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 
 	if err != nil {
 		// Cannot hear back from receiver, which means receiver may fail
+		log.Println(err)
 		memberList[receiver.Id].UnresponseCount++
 		if memberList[receiver.Id].UnresponseCount > 3 {
-			log.Printf("ID: <%d> fail!", receiver.Id)
 			memberList[receiver.Id].Status = 0
-			log.Printf("ID: <%d> fail!", receiver.Id)
 			memberList[receiver.Id].TimeStamp = tNow
 			log.Printf("ID: <%d> fail!", receiver.Id)
 			updatePeerList()
-			log.Printf("ID: <%d> fail!", receiver.Id)
 
 			//gossip update to live peers with multiple goroutine
 			channel := make(chan *rpc.Call, NUMOFPEER)
@@ -88,9 +88,32 @@ func UDPReceiver(done chan bool) {
 	for {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
 		checkErr(err)
-		str := data[:n]
-		_, err = listener.WriteToUDP([]byte(str), remoteAddr)
-		checkErr(err)
+		str := string(data[:n])
+		parseUDPCommand(str, listener, remoteAddr)
 	}
 	done <- true
+}
+
+func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
+	cmdArr := strings.Fields(command)
+	if len(command) == 0 {
+		return
+	}
+	if len(cmdArr) == 1 {
+		_, err := conn.WriteToUDP([]byte(command), addr)
+		checkErr(err)
+	} else if len(cmdArr) == 3 && cmdArr[0] == "ack" {
+		//ack message
+		messageId, err := strconv.Atoi(cmdArr[1])
+		ackVal, err := strconv.Atoi(cmdArr[2])
+		checkErr(err)
+		handleAck(messageId, ackVal)
+	} else if len(cmdArr) == 4 {
+		// data message
+		parseMessage(command)
+	} else {
+		log.Printf("UDP Bad message format!\n")
+		return
+	}
+
 }
