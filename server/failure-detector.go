@@ -103,7 +103,11 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		_, err := conn.WriteToUDP([]byte(command), addr)
 		checkErr(err)
 	} else if len(cmdArr) == 2 {
-		startApp(cmdArr[1])
+		if cmdArr[0] == "start" {
+			startApp(cmdArr[1])
+		} else if cmdArr[0] == "messageSuccess" {
+			deleteMessage(cmdArr[1])
+		}
 	} else if len(cmdArr) == 3 && cmdArr[0] == "ack" {
 		//ack message
 		messageId, err := strconv.Atoi(cmdArr[1])

@@ -258,8 +258,12 @@ func main() {
 		cmdArr := strings.Fields(command)
 		if len(cmdArr) == 0 {
 			continue
-		} else if cmdArr[0] == "start" && len(cmdArr) == 2 {
-			put("demo-data", "demo-data")
+		} else if cmdArr[0] == "start" && len(cmdArr) == 3 {
+			put(cmdArr[2], "demo-data")
+			start(cmdArr[1])
+		} else if cmdArr[0] == "start" && len(cmdArr) == 5 {
+			put(cmdArr[2], "demo-data")
+
 			start(cmdArr[1])
 		} else if cmdArr[0] == "put" && len(cmdArr) == 3 {
 			put(cmdArr[1], cmdArr[2])

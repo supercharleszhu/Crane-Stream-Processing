@@ -162,25 +162,27 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 	// // TODO: when UDPReceiver receives an ack on a message, the message will be removed in map
 
-	// send all message in the message map again to worker
-	for line, data := range message {
-		// connWorker, err := net.Dial("udp", workerIP[0]+":"+"8888")
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
-		// defer connWorker.Close()
+	// send all message in the message map again to worker, if the message is not empty
+	for len(message) != 0 {
+		for line, data := range message {
+			// connWorker, err := net.Dial("udp", workerIP[0]+":"+"8888")
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			// defer connWorker.Close()
 
-		ackVal := int(rand.Int31n(255))
+			ackVal := int(rand.Int31n(255))
 
-		// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
-		sendMessageWorker("transform", ackVal, line, data, workerIP[0])
+			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
+			sendMessageWorker("transform", ackVal, line, data, workerIP[0])
 
-		// // Record the data into message map
-		// message[line] = string(n)
+			// // Record the data into message map
+			// message[line] = string(n)
 
-		// send message to Acker
-		// connMaster.Write([]byte("ack " + strconv.Itoa(line) + " " + strconv.Itoa(ackVal)))
-		sendAck(line, ackVal)
+			// send message to Acker
+			// connMaster.Write([]byte("ack " + strconv.Itoa(line) + " " + strconv.Itoa(ackVal)))
+			sendAck(line, ackVal)
+		}
 	}
 
 	// Answer back to the client CLI
@@ -225,17 +227,31 @@ func sendAppName(appName string) {
 }
 
 func assignRoles() {
-	MasterIp = memberList[1].Ip
-	AckerIp = memberList[1].Ip
-	SpoutIp = memberList[0].Ip
-	standByMasterIp = memberList[2].Ip
-	SinkIp = memberList[len(memberList)-1].Ip
 
+	counter := 0
 	for _, member := range memberList {
-		if member.Ip != MasterIp && member.Ip != SpoutIp && member.Ip != standByMasterIp && member.Ip != SinkIp {
+		if counter == 0 {
+			SpoutIp = member.Ip
+		} else if counter == 1 {
+			MasterIp = member.Ip
+			AckerIp = member.Ip
+		} else if counter == 2 {
+			standByMasterIp = member.Ip
+		} else if counter == len(memberList)-1 {
+			SinkIp = member.Ip
+		} else {
 			workerIP = append(workerIP, member.Ip)
 		}
+
+		counter++
 	}
+
+}
+
+func deleteMessage(id string) {
+	ID, err := strconv.Atoi(id)
+	checkErr(err)
+	delete(message, ID)
 }
 
 // func (r *Crane) MasterStart(args *shared.App, reply *shared.EmptyReq) error {
