@@ -53,9 +53,6 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	// }
 	// log.Printf("Start %s succeeds\n", args.AppName)
 
-	// Assign roles
-	assignRoles()
-
 	// Tell all nodes which application is running
 	sendAppName(args.AppName)
 
@@ -77,7 +74,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 		time.Sleep(SendPeriod)
 		// set up id and random number
 		line++
-		ackVal := int(rand.Int31n(255))
+		ackVal := int(rand.Int31n(254)) + 1
 
 		// Send data to worker (task messageID ackVal data)
 		// TODO: implement transform logic
@@ -102,7 +99,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// }
 			// defer connWorker.Close()
 
-			ackVal := int(rand.Int31n(255))
+			ackVal := int(rand.Int31n(254)) + 1
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
 			sendMessageWorker("transform", ackVal, line, data, workerIP[0])
@@ -229,7 +226,7 @@ func sendMessageWorker(task string, ackVal int, messageId int, message string, w
 	defer conn.Close()
 	checkErr(Err)
 	conn.Write([]byte(messageWorker))
-	log.Printf("send messageId %d: Ack\n", messageId)
+	log.Printf("send messageId %d: %s\n", messageId, task)
 }
 
 func parseMessage(rawMessage string) {
@@ -303,10 +300,37 @@ func assignRoles() {
 		log.Printf("not enough worker\n")
 		return
 	}
+
+	newSpoutIp := aliveIp[0]
+	newSinkIp := aliveIp[counter-1]
 	MasterIp = aliveIp[1]
 	standByMasterIp = aliveIp[2]
 	workerIP = aliveIp[3 : counter-1]
-	SinkIp = aliveIp[counter-1]
+	if SELFIP == aliveIp[0] && SpoutIp != newSpoutIp {
+		crane := new(Crane)
+		SpoutIp = newSpoutIp
+		args := &shared.App{
+			AppName:    currAppName,
+			Period:     Period,
+			SendPeriod: SendPeriod,
+		}
+		res := &shared.WriteAck{}
+		crane.StartApp(args, res)
+	}
+	SpoutIp = newSpoutIp
+	if SELFIP == SpoutIp && SinkIp != newSinkIp {
+		crane := new(Crane)
+		SinkIp = newSinkIp
+		args := &shared.App{
+			AppName:    currAppName,
+			Period:     Period,
+			SendPeriod: SendPeriod,
+		}
+		res := &shared.WriteAck{}
+		crane.StartApp(args, res)
+	}
+	SinkIp = newSinkIp
+
 }
 
 func deleteMessage(id string) {

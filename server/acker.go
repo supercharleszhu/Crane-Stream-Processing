@@ -49,7 +49,7 @@ func launchAcker() {
 				delete(Acker, messageId)
 			}
 		}
-		time.Sleep(time.Duration(500) * time.Millisecond)
+		time.Sleep(time.Duration(1000) * time.Millisecond)
 	}
 }
 
