@@ -118,13 +118,13 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	return nil
 }
 
-func (r *Crane) RecStopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
+func (r *Crane) RecStopApp(args *shared.CraneMsg, reply *shared.WriteAck) error {
 	StopApp = true
 	reply.Finish = true
-	return
+	return nil
 }
 
-func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
+func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) error {
 	//broadcast the stop command
 	channel := make(chan *rpc.Call, NUMOFVM)
 	for _, member := range memberList {
@@ -138,6 +138,7 @@ func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) {
 		gCall := <-channel
 		checkErr(gCall.Error)
 	}
+	return nil
 }
 
 func sendStopAsync(args *shared.CraneMsg, ip string, channel chan *rpc.Call) {
