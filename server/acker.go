@@ -23,17 +23,9 @@ var SinkIp string
 
 func launchAcker() {
 	currTime := time.Now()
-	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
-	spoutAddr := &net.UDPAddr{IP: net.ParseIP(SpoutIp), Port: UDPPORT}
-	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
-	conn1, Err = net.DialUDP("udp", monitorAddr, spoutAddr)
-	conn2, Err = net.DialUDP("udp", monitorAddr, sinkAddr)
-	checkErr(Err)
-	defer conn1.Close()
-	defer conn2.Close()
-
 	for {
 		for messageId, ack := range Acker {
+
 			if currTime.Sub(ack.createdAt) >= TIMEOUT*time.Millisecond {
 				//send fail message to spout
 				messageFail := "messageFail " + strconv.Itoa(messageId)
@@ -51,6 +43,8 @@ func launchAcker() {
 		}
 		time.Sleep(time.Duration(1000) * time.Millisecond)
 	}
+	conn1.Close()
+	conn2.Close()
 }
 
 func handleAck(messageId int, ackVal int) {

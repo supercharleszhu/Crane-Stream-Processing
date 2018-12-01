@@ -212,6 +212,12 @@ func sendAck(messageId int, ackVal int) {
 // App Configuration. Modify this if new app is added
 func startApp(appName string) {
 	assignRoles()
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
+	spoutAddr := &net.UDPAddr{IP: net.ParseIP(SpoutIp), Port: UDPPORT}
+	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
+	conn1, Err = net.DialUDP("udp", monitorAddr, spoutAddr)
+	conn2, Err = net.DialUDP("udp", monitorAddr, sinkAddr)
+	checkErr(Err)
 	Cache = make(map[int]interface{}) //truncate the cache
 	StopApp = false
 	currAppName = appName
