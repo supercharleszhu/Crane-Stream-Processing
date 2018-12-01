@@ -38,6 +38,7 @@ func (w *wordCount) mergeCache(messageId int) {
 			w.result[word] += count
 		}
 	}
+	log.Printf("Merged the cache of messageId: %d into result\n", messageId)
 }
 
 func (w *wordCount) join(data string) {
