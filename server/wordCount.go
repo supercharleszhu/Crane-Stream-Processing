@@ -1,17 +1,36 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
+	"mp-4/shared"
+	"os"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type Pair struct {
+	Key   string
+	Value int
+}
+
+type PairList []Pair
+
+func (p PairList) Len() int           { return len(p) }
+func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
+func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 type wordCount struct {
 	result    map[string]int
 	messageId int
 	ackVal    int
+	counter   int
 }
+
+const CountThreshold = 5000
 
 func (w wordCount) mergeCache(messageId int) {
 	for word, count := range Cache[messageId].(map[string]int) {
@@ -50,6 +69,12 @@ func (w *wordCount) join(data string) {
 		}
 	}
 	sendAck(w.messageId, w.ackVal)
+	w.counter += 1
+
+	// if reach the threshold, write partial result
+	if w.counter >= CountThreshold {
+		w.writeToSDFS()
+	}
 
 }
 func (w *wordCount) transform(data string) {
@@ -74,4 +99,37 @@ func (w *wordCount) getAckVal() int {
 }
 func (w *wordCount) setAckVal(ackVal int) {
 	w.ackVal = ackVal
+}
+
+func (w *wordCount) writeToSDFS() {
+	//1. sorting
+	pl := make(PairList, len(w.result))
+	i := 0
+	for k, v := range w.result {
+		pl[i] = Pair{k, v}
+		i++
+	}
+	sort.Sort(sort.Reverse(pl))
+	//2. create temp file
+	destFile, err := os.Create("./duplication/tempfile")
+	if err != nil {
+		log.Println("os.Create: ", err)
+	}
+	fmt.Fprintf(destFile, "Result of wordcount: \n")
+	for i := 0; i < 5; i++ {
+		fmt.Fprintf(destFile, "%s: %d\n", pl[i].Key, pl[i].Value)
+	}
+	destFile.Close()
+
+	//3. write into SDFS!
+	args := &shared.SDFSMsg{
+		Type:          "put",
+		LocalFileName: "tempfile",
+		SDFSFileName:  "wordcount_result",
+		TimeStamp:     time.Now(),
+	}
+	res := &shared.WriteAck{}
+	sdfs := new(SDFS)
+	sdfs.PutReq(args, res)
+
 }

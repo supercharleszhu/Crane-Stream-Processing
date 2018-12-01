@@ -13,6 +13,7 @@ var MasterIp string
 type App interface {
 	join(message string)
 	transform(message string)
+	mergeCache(messageId int)
 	getAckVal() int
 	setAckVal(ackVal int)
 	getMessageId() int
@@ -42,6 +43,7 @@ func startApp(appName string) {
 			result:    map[string]int{},
 			messageId: 0,
 			ackVal:    0,
+			counter:   0,
 		}
 	}
 }

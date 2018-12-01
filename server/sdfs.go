@@ -50,6 +50,7 @@ func (r *SDFS) PutReq(args *shared.SDFSMsg, reply *shared.WriteAck) error {
 	reply.Finish = true
 	return nil
 }
+
 func sendFile(IP string, args *shared.SDFSMsg, done chan bool) {
 	// Create form file, the first arg is attribute name
 	// the second arg is filename
