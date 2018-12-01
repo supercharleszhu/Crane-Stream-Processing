@@ -96,6 +96,7 @@ func UDPReceiver(done chan bool) {
 
 func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	cmdArr := strings.Fields(command)
+	log.Printf("received data: %s", command)
 	if len(command) == 0 {
 		return
 	}
@@ -124,7 +125,6 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		currApp.mergeCache(messageId)
 	} else if len(cmdArr) >= 4 {
 		// data message
-		log.Printf("received data: %s", cmdArr[3])
 		parseMessage(command)
 	} else {
 		log.Printf("UDP Bad message format!\n message: %s\n", command)
