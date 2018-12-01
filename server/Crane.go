@@ -67,6 +67,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	line := 0
 	for _, ip := range workerIP {
 		n, _, err := br.ReadLine()
+		log.Println(string(n))
 		if err == io.EOF {
 			break
 		}
@@ -98,7 +99,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// 	fmt.Println(err)
 			// }
 			// defer connWorker.Close()
-
+			log.Println(data)
 			ackVal := int(rand.Int31n(254)) + 1
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
@@ -343,6 +344,13 @@ func assignRoles() {
 	}
 	SinkIp = newSinkIp
 
+	log.Println("Spout Ip" + SpoutIp)
+	log.Println("Master Ip" + MasterIp)
+	log.Println("standbyMaster IP" + standByMasterIp)
+	for i := 0; i < len(workerIP); i++ {
+		log.Println("worker IP " + strconv.Itoa(i) + workerIP[i])
+	}
+	log.Println("Sink IP" + SinkIp)
 }
 
 func deleteMessage(id string) {
