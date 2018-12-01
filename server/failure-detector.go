@@ -122,7 +122,7 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		messageId, err := strconv.Atoi(cmdArr[1])
 		checkErr(err)
 		currApp.mergeCache(messageId)
-	} else if len(cmdArr) == 4 {
+	} else if len(cmdArr) >= 4 {
 		// data message
 		log.Printf("received data: %s", cmdArr[3])
 		parseMessage(command)

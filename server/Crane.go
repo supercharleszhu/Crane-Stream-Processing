@@ -242,7 +242,7 @@ func parseMessage(rawMessage string) {
 	task := messageArr[0]
 	messageId, err := strconv.Atoi(messageArr[1])
 	ackVal, err := strconv.Atoi(messageArr[2])
-	data := messageArr[3]
+	data := strings.Join(messageArr[3:], " ")
 	if err != nil {
 		log.Println("parseMessage: Fail!", err)
 	}

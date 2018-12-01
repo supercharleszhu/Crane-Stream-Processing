@@ -77,7 +77,7 @@ func (w *wordCount) transform(data string) {
 		message := word + " " + strconv.Itoa(1)
 		ackVal := int(rand.Int31n(254)) + 1
 		w.ackVal ^= ackVal
-		sendMessageSink(w.messageId, ackVal, message)
+		sendMessageSink(ackVal, w.messageId, message)
 	}
 	sendAck(w.messageId, w.ackVal)
 }
