@@ -124,6 +124,7 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		currApp.mergeCache(messageId)
 	} else if len(cmdArr) == 4 {
 		// data message
+		log.Printf("received data: %s", cmdArr[3])
 		parseMessage(command)
 	} else {
 		log.Printf("UDP Bad message format!\n")
