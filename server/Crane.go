@@ -170,7 +170,7 @@ var currAppName string
 
 func CraneTimer() {
 	for t := range Ticker.C {
-		if currApp != nil {
+		if currApp != nil && SELFIP == SinkIp {
 			currApp.writeToSDFS()
 			log.Printf("App %s write to SDFS at %s\n", currAppName, t.String())
 		}

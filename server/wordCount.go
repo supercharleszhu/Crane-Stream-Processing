@@ -104,14 +104,17 @@ func (w *wordCount) writeToSDFS() {
 		i++
 	}
 	sort.Sort(sort.Reverse(pl))
+
 	//2. create temp file
 	destFile, err := os.Create("./duplication/tempfile")
 	if err != nil {
 		log.Println("os.Create: ", err)
 	}
 	fmt.Fprintf(destFile, "Result of wordcount: \n")
-	for i := 0; i < 5; i++ {
-		fmt.Fprintf(destFile, "%s: %d\n", pl[i].Key, pl[i].Value)
+	if i >= 5 {
+		for i := 0; i < 5; i++ {
+			fmt.Fprintf(destFile, "%s: %d\n", pl[i].Key, pl[i].Value)
+		}
 	}
 	destFile.Close()
 
