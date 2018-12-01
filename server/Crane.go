@@ -67,6 +67,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	line := 0
 	for _, ip := range workerIP {
 		n, _, err := br.ReadLine()
+		log.Println(string(n))
 		if err == io.EOF {
 			break
 		}
@@ -98,7 +99,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// 	fmt.Println(err)
 			// }
 			// defer connWorker.Close()
-
+			log.Println(data)
 			ackVal := int(rand.Int31n(254)) + 1
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
