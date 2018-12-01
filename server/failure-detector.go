@@ -96,7 +96,9 @@ func UDPReceiver(done chan bool) {
 
 func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	cmdArr := strings.Fields(command)
-	log.Printf("received data: %s", command)
+	if len(cmdArr) > 1 {
+		log.Printf("received data: %s", command)
+	}
 	if len(command) == 0 {
 		return
 	}
