@@ -38,8 +38,8 @@ func (w *wordCount) mergeCache(messageId int) {
 		} else {
 			w.result[word] += count
 		}
+		log.Printf("w.result[%s]: %d\n", word, w.result[word])
 	}
-	log.Printf("length of the w.result: %d", len(w.result))
 }
 
 func (w *wordCount) join(data string) {
