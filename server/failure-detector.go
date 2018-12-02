@@ -26,6 +26,7 @@ func launchFailureDetection(done chan bool) {
 			if peerList[i].Status == 1 {
 				UDPSender(peerList[i], time.Now())
 			}
+			log.Println("SendUDP Swim detection: hi!!!!")
 		}
 		time.Sleep(time.Duration(500) * time.Millisecond)
 	}

@@ -27,7 +27,7 @@ var message = make(map[int]string)
 const CRANEPORT = 5001
 
 var Period = 10000 * time.Millisecond // millisecond
-var SendPeriod = 1000 * time.Millisecond
+var SendPeriod = 100 * time.Millisecond
 var Ticker = time.NewTicker(Period)
 
 // Crane RPC server
