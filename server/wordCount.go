@@ -31,7 +31,7 @@ type wordCount struct {
 }
 
 func (w *wordCount) mergeCache(messageId int) {
-	log.Printf("merging Cache.....Cache messageId: %d length of length %d", messageId, len(Cache[messageId].(map[string]int)))
+	log.Printf("merging Cache.....Cache messageId: %d length %d", messageId, len(Cache[messageId].(map[string]int)))
 	for word, count := range Cache[messageId].(map[string]int) {
 		if _, ok := w.result[word]; !ok {
 			w.result[word] = count
@@ -39,7 +39,7 @@ func (w *wordCount) mergeCache(messageId int) {
 			w.result[word] += count
 		}
 	}
-	log.Printf("Merged the cache of messageId: %d into result\n", messageId)
+	log.Printf("length of the w.result: %d", len(w.result))
 }
 
 func (w *wordCount) join(data string) {
@@ -97,15 +97,16 @@ func (w *wordCount) setAckVal(ackVal int) {
 }
 
 func (w *wordCount) writeToSDFS() {
+	log.Println("Writing to SDFS")
 
 	//1. sorting
 	pl := make(PairList, len(w.result))
+	log.Printf("Length of current result: %d\n", len(w.result))
 	i := 0
 
 	for k, v := range w.result {
 		pl[i] = Pair{k, v}
 		i++
-		log.Println(pl[i].Value, pl[i].Key)
 	}
 	sort.Sort(sort.Reverse(pl))
 
@@ -129,7 +130,6 @@ func (w *wordCount) writeToSDFS() {
 		SDFSFileName:  "wordcount_result",
 		TimeStamp:     time.Now(),
 	}
-	log.Println("Writing to SDFS")
 	res := &shared.WriteAck{}
 	sdfs := new(SDFS)
 	sdfs.PutReq(args, res)
