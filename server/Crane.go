@@ -253,7 +253,7 @@ func sendMessageWorker(task string, ackVal int, messageId int, message string, w
 	defer conn.Close()
 	checkErr(Err)
 	conn.Write([]byte(messageWorker))
-	log.Printf("send messageId %d: %s\n", messageId, task)
+	log.Printf("send messageId %d: %s to %s\n", messageId, task, workerIP)
 }
 
 func parseMessage(rawMessage string) {

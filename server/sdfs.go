@@ -127,10 +127,13 @@ func sendFile(IP string, args *shared.SDFSMsg, done chan bool) {
 
 	client := &http.Client{}
 	response, err := client.Do(request)
-	checkErr(err)
-	defer response.Body.Close()
+	if err != nil {
+		log.Printf("Post File Fail IP: %s\n", IP)
+	} else {
+		defer response.Body.Close()
 
-	log.Println("Send file to " + IP + ": " + response.Status)
+		log.Println("Send file to " + IP + ": " + response.Status)
+	}
 	done <- true
 }
 
