@@ -39,6 +39,7 @@ func (w *wordCount) mergeCache(messageId int) {
 			w.result[word] += count
 		}
 	}
+	Cache[messageId] = map[string]int{}
 }
 
 func (w *wordCount) join(data string) {

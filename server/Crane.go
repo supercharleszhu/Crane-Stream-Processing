@@ -78,8 +78,8 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			continue
 		}
 
-		ip := workerIP[counter]
 		counter = (counter + 1) % len(workerIP)
+		ip := workerIP[counter]
 
 		log.Println(string(n))
 
