@@ -129,5 +129,6 @@ func SendGossipSync(args *shared.GossipMsg, ip string) {
 	}
 	printMemberList()
 	updatePeerList()
+	assignRoles()
 	checkErr(err)
 }
