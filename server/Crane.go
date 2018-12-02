@@ -126,6 +126,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// send message to Acker
 			// connMaster.Write([]byte("ack " + strconv.Itoa(line) + " " + strconv.Itoa(ackVal)))
 		}
+		time.Sleep(TIMEOUT * time.Millisecond)
 	}
 
 	// Answer back to the client CLI
