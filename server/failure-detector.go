@@ -43,7 +43,7 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	defer conn.Close()
 
 	conn.Write([]byte("hi"))
-	// log.Printf("UDP sender send \"hi\" to <%s> ", conn.RemoteAddr())
+	log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
 
 	// Ping back from UDP listener
 	data := make([]byte, 16)
