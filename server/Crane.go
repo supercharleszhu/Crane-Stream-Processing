@@ -54,6 +54,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	// log.Printf("Start %s succeeds\n", args.AppName)
 
 	// Tell all nodes which application is running
+	currAppName = args.AppName
 	sendAppName(args.AppName)
 
 	// access the file
@@ -350,6 +351,7 @@ func assignRoles() {
 			Period:     Period,
 			SendPeriod: SendPeriod,
 		}
+		log.Println("new spout: restarting app!")
 		res := &shared.WriteAck{}
 		if StopApp == false {
 			crane.StartApp(args, res)
@@ -364,6 +366,7 @@ func assignRoles() {
 			Period:     Period,
 			SendPeriod: SendPeriod,
 		}
+		log.Println("sink fail: restarting app!")
 		res := &shared.WriteAck{}
 		if StopApp == false {
 			crane.StartApp(args, res)
