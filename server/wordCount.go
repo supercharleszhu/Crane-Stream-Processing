@@ -31,6 +31,7 @@ type wordCount struct {
 }
 
 func (w *wordCount) mergeCache(messageId int) {
+	log.Printf("merging Cache.....Cache messageId: %d length of length %d", messageId, len(Cache[messageId].(map[string]int)))
 	for word, count := range Cache[messageId].(map[string]int) {
 		if _, ok := w.result[word]; !ok {
 			w.result[word] = count
@@ -53,20 +54,20 @@ func (w *wordCount) join(data string) {
 		log.Printf("data format error! messageID: %d\n", w.messageId)
 		return
 	}
-
 	//write data into Cache
 	if temp, ok := Cache[w.messageId]; !ok {
-		Cache[w.messageId] = &map[string]int{
+		Cache[w.messageId] = map[string]int{
 			word: count,
 		}
 	} else {
-		tempMap := *temp.(*map[string]int)
+		tempMap := temp.(map[string]int)
 		if _, ok := tempMap[word]; !ok {
 			tempMap[word] = count
 		} else {
 			tempMap[word] += count
 		}
 	}
+	log.Printf("Join: writing to Cache[%d], length %d\n", w.messageId, len(Cache[w.messageId].(map[string]int)))
 
 	//sendAck
 	sendAck(w.messageId, w.ackVal)
@@ -100,8 +101,6 @@ func (w *wordCount) writeToSDFS() {
 	//1. sorting
 	pl := make(PairList, len(w.result))
 	i := 0
-
-	log.Printf("Length of result, %d\n", len(w.result))
 
 	for k, v := range w.result {
 		pl[i] = Pair{k, v}
