@@ -81,26 +81,33 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	}
 }
 
+func SwimReceiver() {
+	swimConn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT})
+	checkErr(err)
+
+	swimMsg := make([]byte, 16)
+	for {
+		n2, remoteAddr2, err := swimConn.ReadFromUDP(swimMsg)
+		checkErr(err)
+		swimMsg = swimMsg[:n2]
+		log.Printf("received swimMsg: %s from %s", string(swimMsg), remoteAddr2.String())
+		_, err = swimConn.WriteToUDP(swimMsg, remoteAddr2)
+		checkErr(err)
+	}
+
+}
+
 func UDPReceiver(done chan bool) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: UDPPORT})
-	swimConn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT})
 	checkErr(err)
 
 	data := make([]byte, 1000)
 
-	swimMsg := make([]byte, 16)
 	for {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
-		n2, remoteAddr2, err := listener.ReadFromUDP(swimMsg)
 		checkErr(err)
 		str := string(data[:n])
 		log.Printf("received data: %s from %s", string(data), remoteAddr.String())
-
-		swimMsg = swimMsg[:n2]
-		log.Printf("received swimMsg: %s from %s", string(swimMsg), remoteAddr2.String())
-
-		_, err = swimConn.WriteToUDP(swimMsg, remoteAddr2)
-		checkErr(err)
 		parseUDPCommand(str, listener, remoteAddr)
 	}
 	done <- true

@@ -70,6 +70,7 @@ func main() {
 	go CraneTimer()
 	go launchFailureDetection(done)
 	go UDPReceiver(done)
+	go SwimReceiver()
 	go handleHTTP()
 	go launchAcker()
 	log.Printf("Start UDP")
