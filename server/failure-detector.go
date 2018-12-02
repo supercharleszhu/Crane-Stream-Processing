@@ -12,6 +12,7 @@ import (
 )
 
 const UDPPORT = 6001
+const SWIMPORT = 6002
 
 /*SWIM fault detection:
 	1. Send the udp packet to the 3 peers every 500ms so that we can detect the error
@@ -32,8 +33,8 @@ func launchFailureDetection(done chan bool) {
 }
 
 func UDPSender(receiver shared.Member, tNow time.Time) {
-	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
-	dstAddr := &net.UDPAddr{IP: net.ParseIP(receiver.Ip), Port: UDPPORT}
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT}
+	dstAddr := &net.UDPAddr{IP: net.ParseIP(receiver.Ip), Port: SWIMPORT}
 
 	conn, err := net.DialUDP("udp", monitorAddr, dstAddr)
 	if err != nil {
@@ -81,13 +82,19 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 
 func UDPReceiver(done chan bool) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: UDPPORT})
+	swimConn, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT})
 	checkErr(err)
 
 	data := make([]byte, 1000)
+	swimMsg := make([]byte, 16)
 	for {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
+		n2, remoteAddr2, err := listener.ReadFromUDP(swimMsg)
 		checkErr(err)
 		str := string(data[:n])
+		swimMsg = swimMsg[:n2]
+		_, err = swimConn.WriteToUDP(swimMsg, remoteAddr2)
+		checkErr(err)
 		parseUDPCommand(str, listener, remoteAddr)
 	}
 	done <- true
@@ -101,10 +108,7 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	if len(command) == 0 {
 		return
 	}
-	if len(cmdArr) == 1 {
-		_, err := conn.WriteToUDP([]byte(command), addr)
-		checkErr(err)
-	} else if len(cmdArr) == 2 {
+	if len(cmdArr) == 2 {
 		if cmdArr[0] == "start" {
 			startApp(cmdArr[1])
 		} else if cmdArr[0] == "messageSuccess" {
