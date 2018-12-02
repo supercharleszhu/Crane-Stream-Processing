@@ -33,7 +33,7 @@ func launchFailureDetection(done chan bool) {
 }
 
 func UDPSender(receiver shared.Member, tNow time.Time) {
-	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT}
+	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: SWIMPORT + 1}
 	dstAddr := &net.UDPAddr{IP: net.ParseIP(receiver.Ip), Port: SWIMPORT}
 
 	conn, err := net.DialUDP("udp", monitorAddr, dstAddr)
