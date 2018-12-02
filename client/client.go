@@ -225,7 +225,7 @@ func start(appName string) {
 	checkErr(err)
 	reply := &shared.WriteAck{}
 	err = client.Call("Crane.StartApp", req, reply)
-	fmt.Printf("Start %s: %t ", appName, reply.Finish)
+	fmt.Printf("Start %s: %t ", appName, !reply.Finish)
 }
 
 func startWithConfig(appName string, period string, sendPeriod string) {
