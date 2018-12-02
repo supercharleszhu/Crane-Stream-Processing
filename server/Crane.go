@@ -27,7 +27,7 @@ var message = make(map[int]string)
 const CRANEPORT = 5001
 
 var Period = 10000 * time.Millisecond // millisecond
-var SendPeriod = 2000 * time.Millisecond
+var SendPeriod = 1000 * time.Millisecond
 var Ticker = time.NewTicker(Period)
 
 // Crane RPC server
@@ -86,7 +86,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 		time.Sleep(SendPeriod)
 		// set up id and random number
 		line++
-		ackVal := int(rand.Int31n(254)) + 1
+		ackVal := int(rand.Int31n(65534)) + 1
 
 		// Send data to worker (task messageID ackVal data)
 		// TODO: implement transform logic
@@ -113,7 +113,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// }
 			// defer connWorker.Close()
 			log.Println(data)
-			ackVal := int(rand.Int31n(254)) + 1
+			ackVal := int(rand.Int31n(65534)) + 1
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
 			sendMessageWorker("transform", ackVal, line, data, workerIP[0])
