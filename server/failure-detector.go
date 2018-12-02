@@ -124,6 +124,7 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	} else if len(cmdArr) == 2 && cmdArr[0] == "messageCommit" {
 		messageId, err := strconv.Atoi(cmdArr[1])
 		checkErr(err)
+		log.Printf("Commiting message......%d\n", messageId)
 		currApp.mergeCache(messageId)
 	} else if len(cmdArr) >= 4 {
 		// data message
