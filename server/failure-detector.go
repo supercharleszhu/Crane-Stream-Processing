@@ -110,6 +110,15 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 			startApp(cmdArr[1])
 		} else if cmdArr[0] == "messageSuccess" {
 			deleteMessage(cmdArr[1])
+		} else if len(cmdArr) == 2 && cmdArr[0] == "messageAbort" {
+			messageId, err := strconv.Atoi(cmdArr[1])
+			checkErr(err)
+			AbortCache(messageId)
+		} else if len(cmdArr) == 2 && cmdArr[0] == "messageCommit" {
+			messageId, err := strconv.Atoi(cmdArr[1])
+			checkErr(err)
+			log.Printf("Commiting message......%d\n", messageId)
+			currApp.mergeCache(messageId)
 		}
 	} else if len(cmdArr) == 3 && cmdArr[0] == "ack" {
 		//ack message
@@ -117,15 +126,6 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 		ackVal, err := strconv.Atoi(cmdArr[2])
 		checkErr(err)
 		handleAck(messageId, ackVal)
-	} else if len(cmdArr) == 2 && cmdArr[0] == "messageAbort" {
-		messageId, err := strconv.Atoi(cmdArr[1])
-		checkErr(err)
-		AbortCache(messageId)
-	} else if len(cmdArr) == 2 && cmdArr[0] == "messageCommit" {
-		messageId, err := strconv.Atoi(cmdArr[1])
-		checkErr(err)
-		log.Printf("Commiting message......%d\n", messageId)
-		currApp.mergeCache(messageId)
 	} else if len(cmdArr) >= 4 {
 		// data message
 		parseMessage(command)
