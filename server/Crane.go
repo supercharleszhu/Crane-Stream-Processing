@@ -115,8 +115,11 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			log.Println(data)
 			ackVal := int(rand.Int31n(65534)) + 1
 
+			time.Sleep(SendPeriod * time.Millisecond)
+
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
-			sendMessageWorker("transform", ackVal, line, data, workerIP[0])
+			counter = (counter + 1) % len(workerIP)
+			sendMessageWorker("transform", ackVal, line, data, workerIP[counter])
 
 			// // Record the data into message map
 			// message[line] = string(n)

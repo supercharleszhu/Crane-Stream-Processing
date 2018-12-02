@@ -22,8 +22,9 @@ var SpoutIp string
 var SinkIp string
 
 func launchAcker() {
-	currTime := time.Now()
+
 	for {
+		currTime := time.Now()
 		for messageId, ack := range Acker {
 
 			if currTime.Sub(ack.createdAt) >= TIMEOUT*time.Millisecond {
