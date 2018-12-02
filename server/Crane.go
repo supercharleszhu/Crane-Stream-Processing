@@ -74,6 +74,9 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 		if err == io.EOF {
 			break
 		}
+		if len(n) == 0 {
+			continue
+		}
 
 		ip := workerIP[counter]
 		counter = (counter + 1) % len(workerIP)
