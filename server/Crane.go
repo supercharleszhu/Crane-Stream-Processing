@@ -100,6 +100,8 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 	}
 
+	time.Sleep(TIMEOUT * time.Millisecond)
+
 	// // TODO: when UDPReceiver receives an ack on a message, the message will be removed in map
 
 	// send all message in the message map again to worker, if the message is not empty
