@@ -81,7 +81,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 		counter = (counter + 1) % len(workerIP)
 		ip := workerIP[counter]
 
-		log.Println(string(n))
+		//log.Println(string(n))
 
 		time.Sleep(SendPeriod)
 		// set up id and random number
@@ -112,21 +112,19 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// 	fmt.Println(err)
 			// }
 			// defer connWorker.Close()
-			log.Println(data)
 			ackVal := int(rand.Int31n(65534)) + 1
-
-			time.Sleep(SendPeriod * time.Millisecond)
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
 			counter = (counter + 1) % len(workerIP)
 			sendMessageWorker("transform", ackVal, line, data, workerIP[counter])
+			sendAck(line, ackVal)
 
+			time.Sleep(SendPeriod)
 			// // Record the data into message map
 			// message[line] = string(n)
 
 			// send message to Acker
 			// connMaster.Write([]byte("ack " + strconv.Itoa(line) + " " + strconv.Itoa(ackVal)))
-			sendAck(line, ackVal)
 		}
 	}
 
@@ -299,6 +297,15 @@ func sendAppName(appName string) {
 	conn.Close()
 	log.Printf("send start %s to master\n", appName)
 
+	// Send to stand by master
+	ackerAddr = &net.UDPAddr{IP: net.ParseIP(standByMasterIp), Port: UDPPORT}
+	conn, err = net.DialUDP("udp", monitorAddr, ackerAddr)
+	checkErr(err)
+	// defer conn.Close()
+	conn.Write([]byte(message))
+	conn.Close()
+	log.Printf("send start %s to standby master\n", appName)
+
 	// Send to Sink
 	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
 	conn, Err := net.DialUDP("udp", monitorAddr, sinkAddr)
@@ -367,7 +374,6 @@ func assignRoles() {
 		}
 	}
 	SinkIp = newSinkIp
-
 	log.Println("Spout Ip" + SpoutIp)
 	log.Println("Master Ip" + MasterIp)
 	log.Println("standbyMaster IP" + standByMasterIp)

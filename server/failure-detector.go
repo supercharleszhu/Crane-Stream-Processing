@@ -79,7 +79,6 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	}
 }
 
-// TODO: logic here
 func UDPReceiver(done chan bool) {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: UDPPORT})
 	checkErr(err)
@@ -97,7 +96,7 @@ func UDPReceiver(done chan bool) {
 func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	cmdArr := strings.Fields(command)
 	if len(cmdArr) > 1 {
-		log.Printf("received data: %s", command)
+		log.Printf("received data: %s from %s", command, addr.String())
 	}
 	if len(command) == 0 {
 		return
@@ -110,11 +109,11 @@ func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 			startApp(cmdArr[1])
 		} else if cmdArr[0] == "messageSuccess" {
 			deleteMessage(cmdArr[1])
-		} else if len(cmdArr) == 2 && cmdArr[0] == "messageAbort" {
+		} else if cmdArr[0] == "messageAbort" {
 			messageId, err := strconv.Atoi(cmdArr[1])
 			checkErr(err)
 			AbortCache(messageId)
-		} else if len(cmdArr) == 2 && cmdArr[0] == "messageCommit" {
+		} else if cmdArr[0] == "messageCommit" {
 			messageId, err := strconv.Atoi(cmdArr[1])
 			checkErr(err)
 			currApp.mergeCache(messageId)
