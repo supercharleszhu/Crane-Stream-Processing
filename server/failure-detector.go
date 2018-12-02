@@ -43,12 +43,12 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	defer conn.Close()
 
 	conn.Write([]byte("hi"))
-	log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
+	//log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
 
 	// Ping back from UDP listener
 	data := make([]byte, 16)
 	_, err = conn.Read(data)
-	log.Printf("Swim Sender: received data: %s from %s<-%s\n", string(data), monitorAddr.String(), dstAddr.String())
+	//log.Printf("Swim Sender: received data: %s from %s<-%s\n", string(data), monitorAddr.String(), dstAddr.String())
 
 	if err != nil {
 		// Cannot hear back from receiver, which means receiver may fail
@@ -90,7 +90,7 @@ func SwimReceiver() {
 		n2, remoteAddr2, err := swimConn.ReadFromUDP(swimMsg)
 		checkErr(err)
 		swimMsg = swimMsg[:n2]
-		log.Printf("received swimMsg: %s from %s", string(swimMsg), remoteAddr2.String())
+		//log.Printf("received swimMsg: %s from %s", string(swimMsg), remoteAddr2.String())
 		_, err = swimConn.WriteToUDP(swimMsg, remoteAddr2)
 		checkErr(err)
 	}
