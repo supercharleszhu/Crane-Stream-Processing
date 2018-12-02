@@ -96,12 +96,16 @@ func (w *wordCount) setAckVal(ackVal int) {
 }
 
 func (w *wordCount) writeToSDFS() {
+
+	log.Println("Writing to SDFS")
+
 	//1. sorting
 	pl := make(PairList, len(w.result))
 	i := 0
 	for k, v := range w.result {
 		pl[i] = Pair{k, v}
 		i++
+		log.Println(pl[i].Value, pl[i].Key)
 	}
 	sort.Sort(sort.Reverse(pl))
 
@@ -113,6 +117,7 @@ func (w *wordCount) writeToSDFS() {
 	fmt.Fprintf(destFile, "Result of wordcount: \n")
 	if i >= 5 {
 		for i := 0; i < 5; i++ {
+			log.Printf("Writing pairs.... %s,%d\n", pl[i].Key, pl[i].Value)
 			fmt.Fprintf(destFile, "%s: %d\n", pl[i].Key, pl[i].Value)
 		}
 	}
