@@ -86,7 +86,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 		time.Sleep(SendPeriod)
 		// set up id and random number
 		line++
-		ackVal := int(rand.Int31n(65534)) + 1
+		ackVal := int(rand.Int31())
 
 		// Send data to worker (task messageID ackVal data)
 		// TODO: implement transform logic
@@ -112,7 +112,7 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 			// 	fmt.Println(err)
 			// }
 			// defer connWorker.Close()
-			ackVal := int(rand.Int31n(65534)) + 1
+			ackVal := int(rand.Int31())
 
 			// connWorker.Write([]byte(data + " " + strconv.Itoa(ackVal) + "\n"))
 			counter = (counter + 1) % len(workerIP)
