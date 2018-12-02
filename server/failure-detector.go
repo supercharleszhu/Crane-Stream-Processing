@@ -107,7 +107,7 @@ func UDPReceiver(done chan bool) {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
 		checkErr(err)
 		str := string(data[:n])
-		log.Printf("received data: %s from %s", string(data), remoteAddr.String())
+		log.Printf("received data: %s from %s", str, remoteAddr.String())
 		parseUDPCommand(str, listener, remoteAddr)
 	}
 	done <- true
@@ -115,9 +115,6 @@ func UDPReceiver(done chan bool) {
 
 func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	cmdArr := strings.Fields(command)
-	if len(cmdArr) > 1 {
-		log.Printf("received data: %s from %s", command, addr.String())
-	}
 	if len(command) == 0 {
 		return
 	}
