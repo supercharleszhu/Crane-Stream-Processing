@@ -160,6 +160,7 @@ func (r *Crane) StopApp(args *shared.CraneMsg, reply *shared.WriteAck) error {
 		gCall := <-channel
 		checkErr(gCall.Error)
 	}
+	reply.Finish = true
 	return nil
 }
 
@@ -279,7 +280,7 @@ func parseMessage(rawMessage string) {
 }
 
 func AbortCache(messageId int) {
-	Cache[messageId] = new(interface{})
+	delete(Cache, messageId)
 }
 
 func sendAppName(appName string) {
