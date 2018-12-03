@@ -219,6 +219,7 @@ func sendAck(messageId int, ackVal int) {
 func startApp(appName string) {
 	assignRoles()
 	Cache = make(map[int]interface{}) //truncate the cache
+	Acker = make(map[int]*Ack)        //truncate the Acker cache
 	StopApp = false
 	currAppName = appName
 	if appName == "wordCount" {
@@ -366,6 +367,8 @@ func assignRoles() {
 		res := &shared.WriteAck{}
 		if StopApp == false {
 			Restart = true
+			time.Sleep(TIMEOUT * time.Millisecond)
+			message = make(map[int]string)
 			go crane.StartApp(args, res)
 		}
 	}
