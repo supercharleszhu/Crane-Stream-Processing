@@ -1,4 +1,4 @@
-# CS425 MP-3
+# CS425 MP-4
 
 ## Command
 * ```make clean```: remove all the binary and log files
@@ -14,6 +14,8 @@
 
 Then you can use the client to send request to the local server:
 
+* **start application-name local-data-name**: start an application
+* **start application-name local-data-name period sendPeriod**: start an application and specify args
 * **put localfilename sdfsfilename**: put local file to SDFS
 * **get sdfsfilename localfilename**: fetch sdfsfile from SDFS
 * **get-versions sdfsfilename num-versions localfilename**: fetch num-versions sdfsfile from SDFS
