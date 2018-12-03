@@ -18,6 +18,7 @@ import (
 
 var Cache map[int]interface{}
 var StopApp = true
+var Restart = false
 var MasterIp string
 var standByMasterIp string
 
@@ -45,15 +46,6 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 	reply = &shared.WriteAck{}
 	err = client.Call("SDFS.GetReq", req, reply)
 
-	// the VM with smallest ID serves as master
-	// client, err = rpc.Dial("tcp", MasterIp+":"+RPCPORT)
-	// if err != nil {
-	// 	log.Printf("Start %s fails", args.AppName)
-	// 	return nil
-	// }
-	// log.Printf("Start %s succeeds\n", args.AppName)
-
-	// Tell all nodes which application is running
 	currAppName = args.AppName
 	sendAppName(args.AppName)
 
@@ -74,6 +66,11 @@ func (r *Crane) StartApp(args *shared.App, reply *shared.WriteAck) error {
 
 		if err == io.EOF {
 			break
+		}
+		if Restart {
+			log.Println("Restart the App, aborting the current goroutine...")
+			Restart = false
+			return nil
 		}
 		if len(n) == 0 {
 			continue
@@ -354,7 +351,7 @@ func assignRoles() {
 		log.Println("new spout: restarting app!")
 		res := &shared.WriteAck{}
 		if StopApp == false {
-			crane.StartApp(args, res)
+			go crane.StartApp(args, res)
 		}
 	}
 	SpoutIp = newSpoutIp
@@ -366,10 +363,10 @@ func assignRoles() {
 			Period:     Period,
 			SendPeriod: SendPeriod,
 		}
-		log.Println("sink fail: restarting app!")
 		res := &shared.WriteAck{}
 		if StopApp == false {
-			crane.StartApp(args, res)
+			Restart = true
+			go crane.StartApp(args, res)
 		}
 	}
 	SinkIp = newSinkIp

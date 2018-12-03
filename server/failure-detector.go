@@ -26,7 +26,6 @@ func launchFailureDetection(done chan bool) {
 			if peerList[i].Status == 1 {
 				UDPSender(peerList[i], time.Now())
 			}
-			log.Println("SendUDP Swim detection: hi!!!!")
 		}
 		time.Sleep(time.Duration(500) * time.Millisecond)
 	}
@@ -44,7 +43,7 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	defer conn.Close()
 
 	conn.Write([]byte("hi"))
-	//log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
+	log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
 
 	// Ping back from UDP listener
 	data := make([]byte, 16)
@@ -55,6 +54,7 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 		// Cannot hear back from receiver, which means receiver may fail
 		log.Println(err)
 		memberList[receiver.Id].UnresponseCount++
+		log.Printf("the counter of peer %d: %d", receiver.Id, memberList[receiver.Id].UnresponseCount)
 		if memberList[receiver.Id].UnresponseCount > 3 {
 			memberList[receiver.Id].Status = 0
 			memberList[receiver.Id].TimeStamp = tNow
