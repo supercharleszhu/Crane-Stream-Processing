@@ -47,6 +47,7 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 
 	// Ping back from UDP listener
 	data := make([]byte, 16)
+	conn.SetReadDeadline(time.Now().Add(1000 * time.Millisecond))
 	_, err = conn.Read(data)
 	//log.Printf("Swim Sender: received data: %s from %s<-%s\n", string(data), monitorAddr.String(), dstAddr.String())
 
@@ -116,6 +117,13 @@ func UDPReceiver(done chan bool) {
 
 func parseUDPCommand(command string, conn *net.UDPConn, addr *net.UDPAddr) {
 	cmdArr := strings.Fields(command)
+	//if len(cmdArr) ==1 {
+	//	remoteAddr:=&net.UDPAddr{IP:addr.IP,Port:SWIMPORT}
+	//	conn, Err := net.DialUDP("udp", nil, remoteAddr)
+	//	defer conn.Close()
+	//	checkErr(Err)
+	//	conn.Write([]byte("hi"))
+	//}
 	if len(command) == 0 {
 		return
 	}
