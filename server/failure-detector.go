@@ -43,11 +43,11 @@ func UDPSender(receiver shared.Member, tNow time.Time) {
 	defer conn.Close()
 
 	conn.Write([]byte("hi"))
-	log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
+	//log.Printf("UDP sender send \"hi\" to <%s> \n", conn.RemoteAddr())
 
 	// Ping back from UDP listener
 	data := make([]byte, 16)
-	conn.SetReadDeadline(time.Now().Add(1000 * time.Millisecond))
+	conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 	_, err = conn.Read(data)
 	//log.Printf("Swim Sender: received data: %s from %s<-%s\n", string(data), monitorAddr.String(), dstAddr.String())
 

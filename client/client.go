@@ -24,7 +24,7 @@ var ID int // the index of VM
 var memberList [NUMOFVM]shared.Member
 
 const Period = 10000 * time.Millisecond // millisecond
-const SendPeriod = 200 * time.Millisecond
+const SendPeriod = 10 * time.Millisecond
 
 // get the pattern in the distributed grep command
 func getPattern() string {
@@ -225,7 +225,7 @@ func start(appName string) {
 	checkErr(err)
 	reply := &shared.WriteAck{}
 	err = client.Call("Crane.StartApp", req, reply)
-	fmt.Printf("Start %s: %t ", appName, reply.Finish)
+	fmt.Printf("Start %s: %t ", appName, !reply.Finish)
 }
 
 func startWithConfig(appName string, period string, sendPeriod string) {
@@ -243,7 +243,7 @@ func startWithConfig(appName string, period string, sendPeriod string) {
 	checkErr(err)
 	reply := &shared.WriteAck{}
 	err = client.Call("Crane.StartApp", req, reply)
-	fmt.Printf("Start %s: %t ", appName, reply.Finish)
+	fmt.Printf("Start %s: %t ", appName, !reply.Finish)
 }
 
 func init() {

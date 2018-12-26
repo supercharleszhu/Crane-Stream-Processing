@@ -28,7 +28,7 @@ var message = make(map[int]string)
 const CRANEPORT = 5001
 
 var Period = 10000 * time.Millisecond // millisecond
-var SendPeriod = 100 * time.Millisecond
+var SendPeriod = 10 * time.Millisecond
 var Ticker = time.NewTicker(Period)
 
 // Crane RPC server
@@ -338,7 +338,7 @@ func assignRoles() {
 
 	newSpoutIp := aliveIp[0]
 	newSinkIp := aliveIp[counter-1]
-	MasterIp = aliveIp[1]
+	newMasterIp := aliveIp[1]
 	standByMasterIp = aliveIp[2]
 	workerIP = aliveIp[3 : counter-1]
 	if SELFIP == aliveIp[0] && SpoutIp != newSpoutIp {
@@ -372,7 +372,24 @@ func assignRoles() {
 			go crane.StartApp(args, res)
 		}
 	}
+	if SELFIP == SpoutIp && MasterIp != newMasterIp {
+		crane := new(Crane)
+		MasterIp = newMasterIp
+		args := &shared.App{
+			AppName:    currAppName,
+			Period:     Period,
+			SendPeriod: SendPeriod,
+		}
+		res := &shared.WriteAck{}
+		if StopApp == false {
+			Restart = true
+			time.Sleep(TIMEOUT * time.Millisecond)
+			message = make(map[int]string)
+			go crane.StartApp(args, res)
+		}
+	}
 	SinkIp = newSinkIp
+	MasterIp = newMasterIp
 	monitorAddr := &net.UDPAddr{IP: net.ParseIP(SELFIP), Port: 0}
 	spoutAddr := &net.UDPAddr{IP: net.ParseIP(SpoutIp), Port: UDPPORT}
 	sinkAddr := &net.UDPAddr{IP: net.ParseIP(SinkIp), Port: UDPPORT}
