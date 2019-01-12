@@ -3,9 +3,9 @@
 This is a course project from UIUC cs425 distributed system and is divided into 4 stages:
 
 1. Setting up a distributed log system where we can check and grep logs on multiple machines (mp-1, detail explained in cs425_mp1.pdf)
-2. Building a p2p membership system with dynamic membership list. The system support high reliability fault tolerance (mp-2, detail explained in cs425_mp2.pdf)
-3. Building a distributed file system (DFS) with replica control. The DFS is tolerant to at most 3 simultaneous fails and any numbers of total fails. (mp-3, detail explained in cs425_mp3.pdf)
-4. Building a stream processing system like Apache Storm, which can read file from the DFS, process data in different node with different jobs, and write the temporary result into DFS. The system could guarantee the correctness using acker method like Apache Storm, and is generally faster than Apache Spark with relatively small dataset. (detail explained in cs425_mp4.pdf)
+2. Building a p2p membership system with a dynamic membership list. The system support high-reliability fault tolerance (mp-2, detail explained in cs425_mp2.pdf)
+3. Building a distributed file system (DFS) with replica control. The DFS is tolerant to at most 3 simultaneous fails and any numbers of total fail. (mp-3, detail explained in cs425_mp3.pdf)
+4. Building a stream processing system like Apache Storm, which can read the file from the DFS, process data in a different node with different jobs, and write the temporary result into DFS. The system could guarantee the correctness using Acker method like Apache Storm and is generally faster than Apache Spark with a relatively small dataset. (detail explained in cs425_mp4.pdf)
 
 ## Command
 * ```make clean```: remove all the binary and log files
